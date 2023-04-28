@@ -4,6 +4,7 @@ import com.ownsecurity.dto.UserDto;
 import com.ownsecurity.entity.RoleEntity;
 import com.ownsecurity.entity.UserEntity;
 import com.ownsecurity.entity.enums.ERole;
+import com.ownsecurity.exception.UserNotFoundException;
 import com.ownsecurity.repository.RoleRepository;
 import com.ownsecurity.repository.UserRepository;
 import com.ownsecurity.security.service.UserDetailsImpl;
@@ -11,6 +12,7 @@ import com.ownsecurity.service.RoleService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -34,7 +36,7 @@ public class RoleServiceImpl implements RoleService {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if(userDetails.getAuthorities().stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()).contains("ROLE_ADMIN")) {
+        if(userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList().contains("ROLE_ADMIN")) {
 
             Optional<UserEntity> optUser = userRepository.findById(userId);
 
@@ -45,10 +47,10 @@ public class RoleServiceImpl implements RoleService {
                 user.setRoles(userRoles);
                 return UserDto.toUserDto(userRepository.save(user));
             } else {
-                throw new Exception("Не удалось найти пользователя!");
+                throw new UserNotFoundException("Не удалось найти пользователя!");
             }
         } else {
-            return null;
+            throw new ResourceAccessException("У вас нет права доступа к данному ресурсу!");
         }
     }
 
@@ -60,7 +62,7 @@ public class RoleServiceImpl implements RoleService {
         if (user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList().contains("ROLE_ADMIN")) {
             return new HashSet<>(roleRepository.findAll());
         } else {
-            throw new Exception("You do not have access rights to this functionality.");
+            throw new ResourceAccessException("У вас нет права доступа к данному ресурсу!");
         }
     }
 

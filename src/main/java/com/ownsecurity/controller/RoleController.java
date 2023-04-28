@@ -23,9 +23,7 @@ public class RoleController {
 
     @PostMapping("/{userId}")
     public ResponseEntity addRoleToUserByUserId(@PathVariable Long userId) throws Exception {
-        UserDto user = roleService.addRoleToUserByUserId(userId);
-        return user == null ? ResponseEntity.status(HttpStatus.FORBIDDEN).body("У вас нет прав доступа к данному ресурсу!")
-                : ResponseEntity.ok().body(user);
+        return ResponseEntity.ok().body(roleService.addRoleToUserByUserId(userId));
     }
 
     @GetMapping("/")

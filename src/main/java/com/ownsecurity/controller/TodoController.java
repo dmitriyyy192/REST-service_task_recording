@@ -3,10 +3,13 @@ package com.ownsecurity.controller;
 
 import com.ownsecurity.dto.TodoDto;
 import com.ownsecurity.entity.TodoEntity;
+import com.ownsecurity.exception.TodoNotFoundException;
+import com.ownsecurity.exception.UserNotFoundException;
 import com.ownsecurity.service.TodoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.util.List;
 
@@ -28,19 +31,12 @@ public class TodoController {
     }
 
     @GetMapping("/")
-    public ResponseEntity todos() throws Exception {
-        List<TodoDto> todos = todoService.todos();
-        return todos == null ? ResponseEntity.status(HttpStatus.FORBIDDEN).body("У вас нет прав доступа к этому ресурсу!")
-                : ResponseEntity.ok().body(todos);
-//        List<TodoEntity> todos = todoService.todos();
-//        if (todos == null) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("У вас нет прав доступа к этому ресурсу!");
-//        }
-//        return ResponseEntity.ok().body(todoService.todos());
+    public ResponseEntity todos() throws ResourceAccessException {
+        return ResponseEntity.ok().body(todoService.todos());
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity todosByUserId(@PathVariable Long userId) throws Exception {
+    public ResponseEntity todosByUserId(@PathVariable Long userId) throws TodoNotFoundException, UserNotFoundException {
         return ResponseEntity.ok().body(todoService.todosByUserId(userId));
     }
 

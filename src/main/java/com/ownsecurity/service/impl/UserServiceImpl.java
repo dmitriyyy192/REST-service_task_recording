@@ -3,16 +3,21 @@ package com.ownsecurity.service.impl;
 import com.ownsecurity.dto.UserDto;
 import com.ownsecurity.entity.TodoEntity;
 import com.ownsecurity.entity.UserEntity;
+import com.ownsecurity.exception.TodoIsAlreadyAddToUser;
+import com.ownsecurity.exception.TodoNotFoundException;
+import com.ownsecurity.exception.UserNotFoundException;
 import com.ownsecurity.repository.TodoRepository;
 import com.ownsecurity.repository.UserRepository;
 import com.ownsecurity.security.jwt.JwtUtils;
 import com.ownsecurity.security.service.UserDetailsImpl;
 import com.ownsecurity.service.UserService;
+import org.apache.catalina.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -40,40 +45,15 @@ public class UserServiceImpl implements UserService {
         if (userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList().contains("ROLE_ADMIN")) {
             return userRepository.findAll().stream().map(UserDto::toUserDto).collect(Collectors.toList());
         } else {
-            return null;
+            throw new ResourceAccessException("У вас нет доступа к данному ресурсу!");
         }
     }
 
     @Override
-    public List updateUserInfoByUserId(Long userId, UserEntity changedUser) throws Exception {
+    public List updateUserInfoByUserId(Long userId, UserEntity changedUser) {
 
-        UserEntity user = userRepository.findById(userId).orElseThrow();
+        UserEntity user = userRepository.findById(userId).orElseThrow(new UserNotFoundException("Пользователь не найден!"));
 
-//        try {
-//            Field[] userFields = user.getClass().getDeclaredFields();
-//
-//            Arrays.stream(userFields).forEach(userField -> {
-//                userField.setAccessible(true);
-//                Object value;
-//                try {
-//                    value = userField.get(changedUser);
-//                    if (value != null) {
-//                        userField.set(user, value);
-//                    }
-//                } catch (IllegalAccessException e) {
-//                    throw new RuntimeException(e.getMessage());
-//                }
-//            });
-//        } catch (Exception e) {
-//            throw new Exception(e.getMessage());
-//        }
-//
-//        List lst = new ArrayList<>();
-//        lst.add(UserDto.toUserDto(userRepository.save(user)));
-//        lst.add(jwtUtils.generateJwtToken(new UserDetailsImpl(user.getId(),user.getUsername(),user.getEmail(),user.getPassword(),user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))));
-//
-//        return lst;
-//
         if (!(changedUser.getUsername() == null)) {
             user.setUsername(changedUser.getUsername());
         }
@@ -94,7 +74,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserEntity deleteUserByUserId(Long userId) throws Exception {
+    public UserEntity deleteUserByUserId(Long userId) throws ResourceAccessException, UserNotFoundException {
 
         UserDetailsImpl securityUser = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -120,15 +100,15 @@ public class UserServiceImpl implements UserService {
 
                 return removedUser;
             } else {
-                throw new Exception("Пользователь с id = " + userId + " не найден!");
+                throw new UserNotFoundException("Пользователь с id = " + userId + " не найден!");
             }
         } else {
-            return null;
+            throw new ResourceAccessException("У вас нет доступа к данному ресурсу!");
         }
     }
 
     @Override
-    public UserDto addExistTodoToUser(Long todoId) throws Exception {
+    public UserDto addExistTodoToUser(Long todoId) throws TodoNotFoundException, TodoIsAlreadyAddToUser {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<TodoEntity> optTodo = todoRepository.findById(todoId);
@@ -139,7 +119,7 @@ public class UserServiceImpl implements UserService {
 
             List<TodoEntity> userTodos = user.getTodos();
             if(userTodos.contains(todo)) {
-                throw new Exception("Эта задача уже есть в списке данного пользователя!");
+                throw new TodoIsAlreadyAddToUser("Эта задача уже есть у данного пользователя!");
             } else {
                 List<UserEntity> todoUsers = todo.getUsers();
 
@@ -152,7 +132,7 @@ public class UserServiceImpl implements UserService {
                 return UserDto.toUserDto(userRepository.save(user));
             }
         } else {
-            throw new Exception("Невозможно добавить задачу!");
+            throw new TodoNotFoundException("Задача не найдена!");
         }
     }
 }
