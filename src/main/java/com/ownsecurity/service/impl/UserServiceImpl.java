@@ -11,7 +11,8 @@ import com.ownsecurity.repository.UserRepository;
 import com.ownsecurity.security.jwt.JwtUtils;
 import com.ownsecurity.security.service.UserDetailsImpl;
 import com.ownsecurity.service.UserService;
-import org.apache.catalina.User;
+import com.ownsecurity.utils.Utils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,7 +30,8 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final TodoRepository todoRepository;
     private final JwtUtils jwtUtils;
-
+    @Autowired
+    Utils utils;
 
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, TodoRepository todoRepository, JwtUtils jwtUtils) {
         this.userRepository = userRepository;
@@ -54,17 +55,7 @@ public class UserServiceImpl implements UserService {
 
         UserEntity user = userRepository.findById(userId).orElseThrow(new UserNotFoundException("Пользователь не найден!"));
 
-        if (!(changedUser.getUsername() == null)) {
-            user.setUsername(changedUser.getUsername());
-        }
-
-        if (!(changedUser.getEmail() == null)) {
-            user.setEmail(changedUser.getEmail());
-        }
-
-        if (!(changedUser.getPassword() == null)) {
-            user.setPassword(passwordEncoder.encode(changedUser.getPassword()));
-        }
+        utils.changeFields(user, changedUser);
 
         List lst = new ArrayList<>();
         lst.add(UserDto.toUserDto(userRepository.save(user)));
