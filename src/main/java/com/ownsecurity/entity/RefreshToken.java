@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "refreshtokens")
+@Table(name = "Refreshtokens")
 @Data
 public class RefreshToken {
     @Id

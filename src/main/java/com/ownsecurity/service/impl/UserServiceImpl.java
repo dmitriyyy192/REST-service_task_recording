@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
 
         List lst = new ArrayList<>();
         lst.add(UserDto.toUserDto(userRepository.save(user)));
-        lst.add(jwtUtils.generateJwtToken(new UserDetailsImpl(user.getId(),user.getUsername(),user.getEmail(),user.getPassword(),user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))));
+        lst.add(jwtUtils.generateJwtToken(new UserDetailsImpl(user.getId(), user.getUsername(), user.getEmail(), user.getPassword(), user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))));
 
         return lst;
     }
@@ -113,12 +113,12 @@ public class UserServiceImpl implements UserService {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<TodoEntity> optTodo = todoRepository.findById(todoId);
 
-        if(optTodo.isPresent()) {
+        if (optTodo.isPresent()) {
             TodoEntity todo = optTodo.get();
             UserEntity user = userRepository.findById(userDetails.getId()).get();
 
             List<TodoEntity> userTodos = user.getTodos();
-            if(userTodos.contains(todo)) {
+            if (userTodos.contains(todo)) {
                 throw new TodoIsAlreadyAddToUser("Эта задача уже есть у данного пользователя!");
             } else {
                 List<UserEntity> todoUsers = todo.getUsers();

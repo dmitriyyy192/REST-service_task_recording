@@ -45,7 +45,7 @@ public class TodoServiceImpl implements TodoService {
     @Override
     public List<TodoDto> todosByUserId(Long userId) throws TodoNotFoundException, UserNotFoundException {
         Optional<UserEntity> user = userRepository.findById(userId);
-        if(user.isPresent()) {
+        if (user.isPresent()) {
             List<TodoDto> todoDos = user.get().getTodos().stream().map(TodoDto::toTodoDto).toList();
             if (todoDos == null) {
                 throw new TodoNotFoundException("Задачи не найдены!");
@@ -63,7 +63,7 @@ public class TodoServiceImpl implements TodoService {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         UserEntity user = userRepository.findById(userDetails.getId()).get();
-        if(user == null) {
+        if (user == null) {
             throw new UserNotFoundException("Пользователь с id = " + userDetails.getId() + " не найден!");
         }
 
@@ -83,16 +83,27 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
-    public TodoDto completeTodo(Long todoId) throws Exception {
-        Optional<TodoEntity> optTodo = todoRepository.findById(todoId);
+    public TodoDto updateTodo(Long todoId, TodoEntity changedTodo) {
+        TodoEntity todo = todoRepository.findById(todoId).orElseThrow(new TodoNotFoundException("Задача не найдена!"));
 
-        if (optTodo.isPresent()) {
-            TodoEntity todo = optTodo.get();
-            todo.setCompleted(!todo.getCompleted());
-            return TodoDto.toTodoDto(todoRepository.save(todo));
-        } else {
-            throw new TodoNotFoundException("Задача не найдена!");
+        if (!(changedTodo.getTitle() == null)) {
+            todo.setTitle(changedTodo.getTitle());
         }
+        if (!(changedTodo.getCompleted() == null)) {
+            todo.setCompleted(!todo.getCompleted());
+        }
+
+        return TodoDto.toTodoDto(todoRepository.save(todo));
+
+//        Optional<TodoEntity> optTodo = todoRepository.findById(todoId);
+//
+//        if (optTodo.isPresent()) {
+//            TodoEntity todo = optTodo.get();
+//            todo.setCompleted(!todo.getCompleted());
+//            return TodoDto.toTodoDto(todoRepository.save(todo));
+//        } else {
+//            throw new TodoNotFoundException("Задача не найдена!");
+//        }
     }
 
     @Override

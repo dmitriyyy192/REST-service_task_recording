@@ -1,5 +1,6 @@
 package com.ownsecurity.service.impl;
 
+import com.ownsecurity.dto.UserDto;
 import com.ownsecurity.entity.RefreshToken;
 import com.ownsecurity.entity.RoleEntity;
 import com.ownsecurity.entity.UserEntity;
@@ -46,13 +47,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public UserEntity registration(SignupRequest signup) throws Exception {
+    public UserDto registration(SignupRequest signup) throws Exception {
 
-        if(userRepository.existsByUsername(signup.getUsername())) {
+        if (userRepository.existsByUsername(signup.getUsername())) {
             throw new Exception("Username is already taken!");
         }
 
-        if(userRepository.existsByEmail(signup.getEmail())) {
+        if (userRepository.existsByEmail(signup.getEmail())) {
             throw new Exception("Email is already taken!");
         }
 
@@ -61,12 +62,12 @@ public class AuthServiceImpl implements AuthService {
         Set<String> strRoles = signup.getRoles();
         Set<RoleEntity> roles = new HashSet<>();
 
-        if(strRoles.isEmpty()) {
+        if (strRoles.isEmpty()) {
             RoleEntity role = roleRepository.findByName(ERole.ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             roles.add(role);
         } else {
             strRoles.forEach(role -> {
-                if(role.equals("admin")) {
+                if (role.equals("admin")) {
                     RoleEntity adminRole = roleRepository.findByName(ERole.ROLE_ADMIN).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                     roles.add(adminRole);
                 } else {
@@ -78,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
 
         user.setRoles(roles);
 
-        return userRepository.save(user);
+        return UserDto.toUserDto(userRepository.save(user));
 
     }
 

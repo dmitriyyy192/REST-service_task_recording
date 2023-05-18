@@ -11,8 +11,12 @@ import java.util.List;
 public interface TodoService {
 
     List<TodoDto> todos() throws ResourceAccessException;
+
     List<TodoDto> todosByUserId(Long userId) throws TodoNotFoundException, UserNotFoundException;
+
     TodoDto createTodo(TodoEntity todo) throws Exception;
-    TodoDto completeTodo(Long todoId) throws Exception;
+
+    TodoDto updateTodo(Long todoId, TodoEntity todo);
+
     TodoDto removeTodo(Long todoId) throws Exception;
 }

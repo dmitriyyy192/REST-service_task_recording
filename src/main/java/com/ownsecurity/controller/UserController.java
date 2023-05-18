@@ -1,21 +1,19 @@
 package com.ownsecurity.controller;
 
 
-import com.ownsecurity.dto.UserDto;
 import com.ownsecurity.entity.UserEntity;
 import com.ownsecurity.exception.TodoIsAlreadyAddToUser;
 import com.ownsecurity.exception.TodoNotFoundException;
 import com.ownsecurity.exception.UserNotFoundException;
-import com.ownsecurity.security.service.UserDetailsImpl;
 import com.ownsecurity.service.UserService;
 import com.ownsecurity.service.impl.UserServiceImpl;
-import org.springframework.http.HttpStatus;
+import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.ResourceAccessException;
-
-import java.util.List;
-
 
 /*
 POST - add exist todo to user +
@@ -25,6 +23,7 @@ DELETE - user by user id (only for admin) +
  */
 @RestController
 @RequestMapping("/api/users")
+@Api(description = "Отвечает за все операции, связанные с пользователем")
 public class UserController {
 
     private final UserService userService;
@@ -33,23 +32,28 @@ public class UserController {
         this.userService = userService;
     }
 
+    @Operation(summary = "Получить всех пользователей")
     @GetMapping("/")
     public ResponseEntity getUsers() throws ResourceAccessException {
         return ResponseEntity.ok().body(userService.getUsers());
     }
 
+    @Operation(summary = "Добавить существующую задачу пользователю")
     @PostMapping("/{todoId}")
-    public ResponseEntity addExistTodoToUser(@PathVariable Long todoId) throws TodoIsAlreadyAddToUser, TodoNotFoundException {
+    public ResponseEntity addExistTodoToUser(@PathVariable @Parameter(description = "Id задачи") Long todoId) throws TodoIsAlreadyAddToUser, TodoNotFoundException {
         return ResponseEntity.ok().body(userService.addExistTodoToUser(todoId));
     }
 
+    @Operation(summary = "Обновить информацию о пользователе")
     @PatchMapping("/{userId}")
-    public ResponseEntity updateUserInfoByUserId(@PathVariable Long userId, @RequestBody UserEntity user) {
+    public ResponseEntity updateUserInfoByUserId(@PathVariable @Parameter(description = "Id пользователя, которого нужно обновить") Long userId,
+                                                 @RequestBody @Parameter(description = "Поля, которые нужно обновить") UserEntity user) {
         return ResponseEntity.ok().body(userService.updateUserInfoByUserId(userId, user));
     }
 
+    @Operation(summary = "Удалить пользователя по id")
     @DeleteMapping("/{userId}")
-    public ResponseEntity deleteUserByUserId(@PathVariable Long userId) throws ResourceAccessException, UserNotFoundException {
+    public ResponseEntity deleteUserByUserId(@PathVariable @Parameter(description = "Id пользователя") Long userId) throws ResourceAccessException, UserNotFoundException {
         return ResponseEntity.ok().body(userService.deleteUserByUserId(userId));
     }
 }

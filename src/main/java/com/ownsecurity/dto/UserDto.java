@@ -1,6 +1,5 @@
 package com.ownsecurity.dto;
 
-import com.ownsecurity.entity.TodoEntity;
 import com.ownsecurity.entity.UserEntity;
 
 import java.util.List;

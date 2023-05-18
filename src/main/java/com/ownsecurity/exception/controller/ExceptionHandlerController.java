@@ -2,6 +2,7 @@ package com.ownsecurity.exception.controller;
 
 import com.ownsecurity.exception.TodoIsAlreadyAddToUser;
 import com.ownsecurity.exception.TodoNotFoundException;
+import com.ownsecurity.exception.UserNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,5 +34,10 @@ public class ExceptionHandlerController extends ResponseEntityExceptionHandler {
     @ExceptionHandler(TodoIsAlreadyAddToUser.class)
     public ResponseEntity todoIsAlreadyAddToUser(TodoIsAlreadyAddToUser exception) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity userNotFoundException(UserNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
     }
 }

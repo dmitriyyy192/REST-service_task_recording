@@ -36,11 +36,11 @@ public class RoleServiceImpl implements RoleService {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if(userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList().contains("ROLE_ADMIN")) {
+        if (userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList().contains("ROLE_ADMIN")) {
 
             Optional<UserEntity> optUser = userRepository.findById(userId);
 
-            if(optUser.isPresent()) {
+            if (optUser.isPresent()) {
                 UserEntity user = optUser.get();
                 Set<RoleEntity> userRoles = user.getRoles();
                 userRoles.add(roleRepository.findByName(ERole.ROLE_ADMIN).get());

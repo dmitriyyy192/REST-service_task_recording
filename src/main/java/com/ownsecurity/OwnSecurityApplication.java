@@ -25,7 +25,7 @@ public class OwnSecurityApplication {
     public class RunAfterStartup {
         @EventListener(ApplicationReadyEvent.class)
         public void runAfterStartup() {
-            if(roleRepository.findAll().isEmpty()) {
+            if (roleRepository.findAll().isEmpty()) {
                 roleRepository.save(new RoleEntity("ROLE_USER"));
                 roleRepository.save(new RoleEntity("ROLE_ADMIN"));
             }
